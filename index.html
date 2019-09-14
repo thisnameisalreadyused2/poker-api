@@ -1,8 +1,16 @@
+<p id="token">Token not found</p>
+<button id="registerButton" onclick="register()">Vote</button>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-    var socket = io.connect('http://localhost');
-    socket.on('news', function (data) {
-        console.log(data);
-        socket.emit('my other event', { my: 'data' });
+    const socket = io.connect('http://localhost:9999');
+    socket.on('connect', function (data) {
+        socket.emit('newMember');
     });
+    socket.on('vote', function (data) {
+        console.log(data);
+    });
+    function register() {
+        socket.emit("newVote");
+    }
+
 </script>

@@ -1,0 +1,20 @@
+<p><b>Ваше имя:</b><br>
+    <input type="text" id="inputName">
+</p>
+<button id="registerButton" onclick="register()">Register</button>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const registerSocket = io.connect('http://localhost:9999/admin');
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
+
+    sessionStorage.setItem("token", token);
+
+    function register() {
+        registerSocket.emit('newUser', {
+            "username": document.getElementById("inputName"),
+            "token": token
+        })
+    }
+</script>

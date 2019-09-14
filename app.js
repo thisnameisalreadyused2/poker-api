@@ -16,17 +16,17 @@ app.get('/register', function (req, res) {
 io.on('connection', function (socket) {
     socket.on('requestToken', () => {
         let token = hat();
-        teams.set(token, new Map([
-            {userStory: "test story"},
-            {state: "voting"},
-            {users: []}
-        ]));
+        createNewTeam(token);
         socket.emit('receiveToken', {
             "token" : token
         });
     });
     socket.on('newTeamMember', (data) => {
-        let currentTeam = teams.get(data.token);
+      let currentTeam = teams.get(data.token);
+      if (currentTeam === undefined){
+        currentTeam = createNewTeam(data.token);
+      }
+
         let currentUserName = data.username;
 
         if (currentUserName === null) {
@@ -44,6 +44,15 @@ io.on('connection', function (socket) {
 
     });
 });
+
+function createNewTeam(token) {
+  let newTeam = new Map();
+  newTeam.set("userStory", "User story is not selected");
+  newTeam.set("state", "Planning");
+  newTeam.set("users", []);
+  teams.set(token, newTeam);
+  return newTeam;
+}
 
 // let usersManager = io
 //     .of('/users')

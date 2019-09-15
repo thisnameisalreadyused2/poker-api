@@ -68,6 +68,7 @@ io.on('connection', function (socket) {
       let teamUsers = currentTeam.get('users');
       for (let userId in teamUsers) {
         teamUsers[userId].socket.emit('restartVoting');
+        teamUsers[userId].vote = null;
       }
     })
 });

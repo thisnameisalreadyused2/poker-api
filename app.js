@@ -27,22 +27,49 @@ io.on('connection', function (socket) {
         currentTeam = createNewTeam(data.token);
       }
 
-        let currentUserName = data.username;
+      let currentUserName = data.username;
 
-        if (currentUserName === null) {
-            socket.emit('needRegister');
-            return;
+      if (currentUserName === null) {
+          socket.emit('needRegister');
+          return;
+      }
+
+      currentTeam.get('users').push({
+        name: currentUserName,
+        socket: socket,
+        vote: null
+      });
+    });
+    socket.on('newVote', (data) => {
+      let currentTeam = teams.get(data.token);
+      let teamUsers = currentTeam.get('users');
+      let userIndex = teamUsers.findIndex(user => user.socket.id === socket.id);
+      teamUsers[userIndex].vote = data.vote;
+
+      let votes = [];
+
+      for (let userId in teamUsers) {
+        if (teamUsers[userId].vote === null) {
+          votes = [];
+          return;
         }
-
-        currentTeam.get('users').push({
-          name: currentUserName,
-          socket: socket,
-          vote: null
-        });
+        votes.push({
+          key: teamUsers[userId].socket.id,
+          name: teamUsers[userId].name,
+          points: teamUsers[userId].vote,
+        })
+      }
+      for (let userId in teamUsers) {
+        teamUsers[userId].socket.emit('voteEnded', votes);
+      }
     });
-    socket.on('newVote', () => {
-
-    });
+    socket.on('onRestartVoting', (data) => {
+      let currentTeam = teams.get(data.token);
+      let teamUsers = currentTeam.get('users');
+      for (let userId in teamUsers) {
+        teamUsers[userId].socket.emit('restartVoting');
+      }
+    })
 });
 
 function createNewTeam(token) {
